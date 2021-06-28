@@ -28,9 +28,11 @@ export default {
     div() {
       this.sum = this.operand1 / this.operand2;
     },
+		
     eventFn() {
       this.sum = (this.operand1 / this.operand2) >> 0;
     },
+
     expo() {
       this.sum = this.operand1 ** this.operand2;
     },
