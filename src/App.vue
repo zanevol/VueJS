@@ -2,7 +2,7 @@
   <div id="app">
     <header class="header">
       <h1 class="header-title">My personal cost</h1>
-      <Button @showActiveModal="showActiveModal" />
+      <Button/>
     </header>
     <main>
       <Payments
@@ -18,16 +18,13 @@
         @changeCurrentPage="changeCurrentPage"
       />
     </main>
-    <AddPayment
-      :showModal="showModal"
-      @closeModal="closeModal"
-      @addNewPayment="addData"
-    />
+    <AddPayment/>
     <router-view />
   </div>
 </template>
 
 <script>
+import { mapGetters, mapActions } from "vuex";
 import Button from "./components/Button.vue";
 import Pagination from "./components/Pagination.vue";
 import Payments from "./components/PaymentsDisplay.vue";
@@ -37,14 +34,15 @@ export default {
   components: { Payments, AddPayment, Button, Pagination },
   data() {
     return {
-      paymentsList: JSON.parse(localStorage.getItem("paymentsList") || []),
-      showModal: false,
+      //JSON.parse(localStorage.getItem("paymentsList") || [])
+
       currentPage: 1,
       sizePage: 10,
     };
   },
 
   methods: {
+    ...mapActions(["fetchPaymentsList"]),
     changeCurrentPage(page) {
       this.currentPage = page;
     },
@@ -53,37 +51,25 @@ export default {
       this.currentPage = 1;
       this.sizePage = records;
     },
-
-    addData(data) {
-      this.paymentsList.push(data);
-      localStorage.setItem("paymentsList", JSON.stringify(this.paymentsList));
-      this.showModal = false;
-    },
-    showActiveModal() {
-      this.showModal === true
-        ? (this.showModal = false)
-        : (this.showModal = true);
-    },
-    closeModal() {
-      this.showModal = false;
-    },
   },
 
   computed: {
+    ...mapGetters(["allPaymentsList"]),
     paginatedList() {
       let start = this.currentPage * this.sizePage - this.sizePage;
       let end = start + this.sizePage;
       let paginatedList = [];
-      if (this.paymentsList) {
-        paginatedList = this.paymentsList.slice(start, end);
+      if (this.allPaymentsList) {
+        paginatedList = this.allPaymentsList.slice(start, end);
       }
       return paginatedList;
     },
 
     countLists() {
-      return this.paymentsList ? this.paymentsList.length : 0;
+      return this.allPaymentsList ? this.allPaymentsList.length : 0;
     },
   },
+
 };
 </script>
 

@@ -1,21 +1,20 @@
 <template>
-  <div class="payment-modal" v-if="showModal">
+  <div class="payment-modal" v-if="$store.state.showModal">
     <span @click.stop="closeModal">&#10006;</span>
-    <form ref="form">
+
+    <form ref="form" @submit.prevent="onClick">
       <input type="text" v-model="date" placeholder="date" />
       <input type="text" v-model="category" placeholder="category" />
       <input type="text" v-model.number="value" placeholder="value" />
+      <button type="submit">Add Data</button>
     </form>
-    <button @click.stop="onClick">Add Data</button>
   </div>
 </template>
 
 <script>
+import { mapActions } from "vuex";
 export default {
   name: "AddPayment",
-  props: {
-    showModal: Boolean,
-  },
   data() {
     return {
       date: "",
@@ -25,20 +24,21 @@ export default {
     };
   },
   methods: {
+    ...mapActions(["fetchPaymentsList", "fetchCloseModal"]),
+
     closeModal() {
-      this.$emit("closeModal");
+      this.fetchCloseModal();
     },
     onClick() {
       const { category, value } = this;
-      const data = {
+      this.fetchPaymentsList({
         date: this.date || this.getCurrentDate,
         category,
         value,
-      };
-      this.$emit("addNewPayment", data);
-      this.date = "";
-      this.category = "";
-      this.value = "";
+      });
+      this.$refs["form"].reset();
+      console.log(this.$refs["form"]);
+      this.fetchCloseModal();
     },
   },
 
@@ -82,7 +82,7 @@ export default {
   }
 
   form {
-    height: 150px;
+    height: 250px;
     display: flex;
     align-items: center;
     flex-direction: column;

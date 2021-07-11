@@ -42,10 +42,7 @@
 export default {
   name: "PaymentsDisplay",
   props: {
-    list: {
-      type: Array,
-      default: () => [],
-    },
+    list: Array,
     currentPage: Number,
     sizePage: Number,
   },
@@ -53,7 +50,6 @@ export default {
     return {};
   },
   methods: {},
-  computed: {},
 };
 </script>
 
