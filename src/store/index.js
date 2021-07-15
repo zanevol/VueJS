@@ -10,13 +10,13 @@ export default new Vuex.Store({
 	},
 
 	actions: {
-		fetchPaymentsList({ commit }, payment) {
+		setPaymentsList({ commit }, payment) {
 			commit('createPaymentsList', payment);
 		},
-		fetchOpenModal({ commit }) {
+		setOpenModal({ commit }) {
 			commit('openModal');
 		},
-		fetchCloseModal({ commit }) {
+		setCloseModal({ commit }) {
 			commit('closeModal');
 		},
 	},

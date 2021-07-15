@@ -2,7 +2,13 @@
   <div id="app">
     <header class="header">
       <h1 class="header-title">My personal cost</h1>
-      <Button/>
+      <Button />
+      <router-link to="/add/Food/?value=500">AddFood</router-link> /
+      <router-link to="/add/Transport/?value=50">AddTransport</router-link> /
+      <router-link to="/add/Entertainment?value=2000"
+        >AddEntrtainment</router-link
+      >
+      <router-view />
     </header>
     <main>
       <Payments
@@ -18,8 +24,7 @@
         @changeCurrentPage="changeCurrentPage"
       />
     </main>
-    <AddPayment/>
-    <router-view />
+    <AddPayment />
   </div>
 </template>
 
@@ -35,14 +40,13 @@ export default {
   data() {
     return {
       //JSON.parse(localStorage.getItem("paymentsList") || [])
-
       currentPage: 1,
       sizePage: 10,
     };
   },
 
   methods: {
-    ...mapActions(["fetchPaymentsList"]),
+    ...mapActions(["setOpenModal"]),
     changeCurrentPage(page) {
       this.currentPage = page;
     },
@@ -69,7 +73,6 @@ export default {
       return this.allPaymentsList ? this.allPaymentsList.length : 0;
     },
   },
-
 };
 </script>
 

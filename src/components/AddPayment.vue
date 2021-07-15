@@ -24,21 +24,21 @@ export default {
     };
   },
   methods: {
-    ...mapActions(["fetchPaymentsList", "fetchCloseModal"]),
-
+    ...mapActions(["setPaymentsList", "setCloseModal", "setOpenModal"]),
     closeModal() {
-      this.fetchCloseModal();
+      this.setCloseModal();
+      this.$refs["form"].reset();
+      window.history.length > 0 ? this.$router.go(-1) : this.$router.push("/");
     },
     onClick() {
       const { category, value } = this;
-      this.fetchPaymentsList({
+      this.setPaymentsList({
         date: this.date || this.getCurrentDate,
         category,
         value,
       });
       this.$refs["form"].reset();
-      console.log(this.$refs["form"]);
-      this.fetchCloseModal();
+      this.setCloseModal();
     },
   },
 
@@ -51,6 +51,18 @@ export default {
       };
       return new Intl.DateTimeFormat("ru-Ru", options).format(this.newDate);
     },
+    getQueryFromRoute() {
+      return this.$route.query?.value ?? null;
+    },
+    getCategoryParamsFromRoute() {
+      return this.$route.params?.category ?? null;
+    },
+  },
+  created() {
+    if (this.getQueryFromRoute || this.getCategoryParamsFromRoute) {
+      this.category = this.getCategoryParamsFromRoute;
+      this.value = this.getQueryFromRoute;
+    }
   },
 };
 </script> 

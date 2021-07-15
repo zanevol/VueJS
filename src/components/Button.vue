@@ -13,9 +13,9 @@ export default {
     return {};
   },
   methods: {
-    ...mapActions(["fetchOpenModal"]),
+    ...mapActions(["setOpenModal"]),
     showActiveModal() {
-      this.fetchOpenModal();
+      this.setOpenModal();
     },
   },
 };
@@ -25,6 +25,7 @@ export default {
 .add-payment {
   padding: 10px 25px;
   margin-bottom: 40px;
+  margin-right: 20px;
   background: #25a79b;
   border: none;
   border-radius: 5px;
