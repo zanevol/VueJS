@@ -1,11 +1,10 @@
 <template>
-  <button class="add-payment" @click.stop="showActiveModal">
+  <button class="add-payment" @click.stop="$emit('showActiveModal')">
     Add Payment +
   </button>
 </template>
 
 <script>
-import { mapActions } from "vuex";
 
 export default {
   name: "Button",
@@ -13,10 +12,7 @@ export default {
     return {};
   },
   methods: {
-    ...mapActions(["setOpenModal"]),
-    showActiveModal() {
-      this.setOpenModal();
-    },
+
   },
 };
 </script>

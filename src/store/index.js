@@ -5,20 +5,28 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
 	state: {
+		activeModal: '',
+		activeModal2: '',
 		paymentsList: JSON.parse(localStorage.getItem("paymentsList") || '[]'),
-		showModal: false,
+		editList: {},
 	},
 
 	actions: {
+		setActiveModal({ commit }, activeModalName) {
+			commit('SETACTIVEMODAL', activeModalName);
+		},
+		setActiveModal2({ commit }, activeModalName) {
+			commit('SETACTIVEMODAL2', activeModalName);
+		},
 		setPaymentsList({ commit }, payment) {
 			commit('createPaymentsList', payment);
 		},
-		setOpenModal({ commit }) {
-			commit('openModal');
+		deleteEl({ commit }, id) {
+			commit('delElem', id);
 		},
-		setCloseModal({ commit }) {
-			commit('closeModal');
-		},
+		editEl({ commit }, item) {
+			commit('editElem', item);
+		}
 	},
 
 	mutations: {
@@ -29,18 +37,32 @@ export default new Vuex.Store({
 			state.paymentsList.push(payment);
 			localStorage.setItem('paymentsList', JSON.stringify(state.paymentsList));
 		},
-		closeModal(state) {
-			state.showModal = false;
+		editElem(state, { date, category, value, id }) {
+			const payments = state.paymentsList.concat(),
+				idx = payments.findIndex(t => t.id === id),
+				payment = payments[idx];
+			payments[idx] = { ...payment, date, category, value };
+			state.paymentsList = payments;
+			localStorage.setItem('paymentsList', JSON.stringify(state.paymentsList));
 		},
-		openModal(state) {
-			state.showModal === true ? state.showModal = false : state.showModal = true;
-		}
+		delElem(state, id) {
+			state.paymentsList = state.paymentsList.filter((t, i) => i !== id);
+			localStorage.setItem('paymentsList', JSON.stringify(state.paymentsList));
+		},
+
+		SETACTIVEMODAL(state, activeModalName) {
+			state.activeModal = activeModalName;
+		},
+		SETACTIVEMODAL2(state, activeModalName) {
+			state.activeModal2 = activeModalName;
+		},
+
 	},
 
 	getters: {
-		allPaymentsList(state) {
-			return state.paymentsList;
-		}
+		allPaymentsList: state => state.paymentsList,
+		ACTIVEMODAL: state => state.activeModal,
+		ACTIVEMODAL2: state => state.activeModal2
 	},
 
 })

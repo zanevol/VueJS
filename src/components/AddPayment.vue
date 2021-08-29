@@ -1,8 +1,19 @@
 <template>
-  <div class="payment-modal" v-if="$store.state.showModal">
-    <span @click.stop="closeModal">&#10006;</span>
+  <div class="payment-modal">
+    <span @click.stop="$emit('closeModal')">&#10006;</span>
 
-    <form ref="form" @submit.prevent="onClick">
+    <form
+      ref="form"
+      @submit.prevent="savePayment"
+      v-if="editItem && Object.keys(editItem).length"
+    >
+      <input type="text" v-model="editItem.date" placeholder="date" />
+      <input type="text" v-model="editItem.category" placeholder="category" />
+      <input type="text" v-model.number="editItem.value" placeholder="value" />
+      <button type="submit">Save</button>
+    </form>
+
+    <form ref="form" @submit.prevent="onClick" v-else>
       <input type="text" v-model="date" placeholder="date" />
       <input type="text" v-model="category" placeholder="category" />
       <input type="text" v-model.number="value" placeholder="value" />
@@ -13,8 +24,12 @@
 
 <script>
 import { mapActions } from "vuex";
+
 export default {
   name: "AddPayment",
+  props: {
+    editItem: Object,
+  },
   data() {
     return {
       date: "",
@@ -24,11 +39,13 @@ export default {
     };
   },
   methods: {
-    ...mapActions(["setPaymentsList", "setCloseModal", "setOpenModal"]),
+    ...mapActions(["setPaymentsList", "editEl"]),
     closeModal() {
-      this.setCloseModal();
-      this.$refs["form"].reset();
+      this.showModal = false;
       window.history.length > 0 ? this.$router.go(-1) : this.$router.push("/");
+      this.date = "";
+      this.category = "";
+      this.value = "";
     },
     onClick() {
       const { category, value } = this;
@@ -36,12 +53,24 @@ export default {
         date: this.date || this.getCurrentDate,
         category,
         value,
+        id: Date.now(),
       });
       this.$refs["form"].reset();
-      this.setCloseModal();
+      this.date = "";
+      this.category = "";
+      this.value = "";
+      this.activeModal2 = "";
+    },
+    savePayment() {
+      this.editEl({
+        date: this.editItem.date,
+        category: this.editItem.category,
+        value: this.editItem.value,
+        id: this.editItem.id,
+      });
+      this.activeModal = "";
     },
   },
-
   computed: {
     getCurrentDate() {
       const options = {
@@ -56,6 +85,22 @@ export default {
     },
     getCategoryParamsFromRoute() {
       return this.$route.params?.category ?? null;
+    },
+    activeModal: {
+      get() {
+        return this.$store.getters.ACTIVEMODAL;
+      },
+      set(activeModalName) {
+        this.$store.dispatch("setActiveModal", activeModalName);
+      },
+    },
+    activeModal2: {
+      get() {
+        return this.$store.getters.ACTIVEMODAL2;
+      },
+      set(activeModalName) {
+        this.$store.dispatch("setActiveModal2", activeModalName);
+      },
     },
   },
   created() {
