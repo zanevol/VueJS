@@ -1,100 +1,138 @@
 <template>
-  <div class="payments-list" @click.stop="activeModal2 = ''">
-    <div class="payments-list-header">
-      <div class="payments-list-header-count">
-        <span>#</span>
-      </div>
-      <div class="payments-list-header-date">
-        <span>Date</span>
-      </div>
-      <div class="payments-list-header-category">
-        <span>Category</span>
-      </div>
-      <div class="payments-list-header-value">
-        <span>Value</span>
-      </div>
-    </div>
+  <v-row class="payments-list" @click.stop="context = false">
+    <v-col>
+      <div class="text-center text-h4 text-md-h3 mb-4">My Personal Cost</div>
+      <v-dialog v-model="dialog" width="500">
+        <template v-slot:activator="{ on }">
+          <v-btn class="mb-4" :ripple="false" color="teal" dark v-on="on">
+            Add New Cost
+            <v-icon>mdi-plus</v-icon>
+          </v-btn>
+        </template>
 
-    <div class="payments-list-wrapper">
-      <div
-        class="payments-list-wrapper-table"
-        v-for="(item, idx) in list"
-        :key="idx"
-      >
-        <div class="payments-list-wrapper-table-count">
-          <span>{{ currentPage * sizePage - sizePage + (idx + 1) }}</span>
-        </div>
-        <div class="payments-list-wrapper-table-date">
-          <span>{{ item.date }}</span>
-        </div>
-        <div class="payments-list-wrapper-table-category">
-          <span>{{ item.category }}</span>
-        </div>
-        <div class="payments-list-wrapper-table-value">
-          <span>{{ item.value }}</span>
-          <span
-            class="payments-list-wrapper-table-value-menu"
-            @click.stop="showContextMenu($event, idx, item)"
-          ></span>
-        </div>
+        <v-card>
+          <AddPayment
+            :edit-item="editItem"
+            :id="elemId"
+            @closeDialog="closeDialog"
+          />
+        </v-card>
+      </v-dialog>
+
+      <v-simple-table fixed-header height="440px">
+        <template v-slot:default>
+          <thead>
+            <tr>
+              <th class="text-center">#</th>
+              <th class="text-center">Date</th>
+              <th class="text-center">Category</th>
+              <th class="text-center">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(item, idx) in paginatedList" :key="idx">
+              <td class="text-center">
+                {{ currentPage * sizePage - sizePage + (idx + 1) }}
+              </td>
+              <td class="text-center">{{ item.date }}</td>
+              <td class="text-center">{{ item.category }}</td>
+              <td class="text-center" style="position: relative">
+                {{ item.value }}
+                <v-btn
+                  icon
+                  absolute
+                  style="top: 50%; right: 0; transform: translateY(-50%)"
+                  @click.stop="showContextMenu($event, idx, item)"
+                >
+                  <v-icon>mdi-dots-vertical</v-icon>
+                </v-btn>
+              </td>
+            </tr>
+          </tbody>
+        </template>
+      </v-simple-table>
+
+      <Pagination
+        :count-lists="countLists"
+        :current-page="currentPage"
+        :size="sizePage"
+        @changeSizeRecords="changeSizeRecords"
+        @changeCurrentPage="changeCurrentPage"
+      />
+
+      <ContextMenu
+        :context="context"
+        :x="x"
+        :y="y"
+        @editElem="editElem"
+        @deleteElem="delElem"
+      />
+    </v-col>
+
+    <v-col align-self="center" justify="center">
+      <div class="payments-chart">
+        <canvas ref="canvas"></canvas>
       </div>
-    </div>
-
-    <ContextMenu
-      v-show="activeModal2 === 'context'"
-      @editElem="editElem"
-      @deleteElem="delElem"
-    />
-
-    <AddPayment
-      v-show="activeModal === 'showAddPayModal'"
-      :edit-item="editItem"
-      :id="elemId"
-      @closeModal="activeModal = ''"
-    />
-  </div>
+    </v-col>
+  </v-row>
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 import AddPayment from "./AddPayment.vue";
+import Pagination from "./Pagination.vue";
+import { Pie } from "vue-chartjs";
 const ContextMenu = () => import("./ContextMenu.vue");
 
 export default {
   name: "PaymentsDisplay",
-  components: { ContextMenu, AddPayment },
-  props: {
-    list: Array,
-    currentPage: Number,
-    sizePage: Number,
-  },
+  extends: Pie,
+  components: { ContextMenu, AddPayment, Pagination },
   data() {
     return {
       elemId: null,
       editItem: {},
+      currentPage: 1,
+      sizePage: 10,
+      dialog: false,
+      context: false,
+      x: 0,
+      y: 0,
+      records: [],
     };
   },
   methods: {
     ...mapActions(["deleteEl"]),
     showContextMenu(event, id, item) {
-      const context = document.querySelector(".context-wrapper");
-      context.style.top = `${event.clientY - 170}px`;
-      context.style.right = 0;
+      this.x = event.clientX;
+      this.y = event.clientY;
       this.elemId = id;
       this.editItem = JSON.parse(JSON.stringify(item));
-      this.activeModal2 = "context";
+      this.context = true;
     },
     editElem() {
-      this.activeModal = "showAddPayModal";
-      this.activeModal2 = "";
+      this.dialog = true;
+      this.context = false;
     },
     delElem() {
       this.deleteEl(this.elemId);
-      this.activeModal2 = "";
+      this.context = false;
     },
     closeActiveModal() {
       this.actveModal = "";
       this.editItem = {};
+    },
+    changeCurrentPage(page) {
+      this.currentPage = page;
+    },
+
+    changeSizeRecords(records) {
+      this.currentPage = 1;
+      this.sizePage = records;
+    },
+
+    closeDialog() {
+      this.dialog = false;
     },
   },
 
@@ -115,125 +153,63 @@ export default {
         this.$store.dispatch("setActiveModal2", activeModalName);
       },
     },
+    ...mapGetters(["allPaymentsList"]),
+    paginatedList() {
+      let start = this.currentPage * this.sizePage - this.sizePage;
+      let end = start + this.sizePage;
+      let paginatedList = [];
+      if (this.allPaymentsList) {
+        paginatedList = this.allPaymentsList.slice(start, end);
+      }
+      return paginatedList;
+    },
+
+    countLists() {
+      return this.allPaymentsList ? this.allPaymentsList.length : 0;
+    },
   },
 
-  mounted() {},
+  mounted() {
+    this.records = this.allPaymentsList;
+    this.renderChart({
+      labels: this.allPaymentsList.map((item) => item.category),
+      datasets: [
+        {
+          label: "Payments chart",
+          data: this.allPaymentsList.map((item) => {
+            return this.records.reduce((total, r) => {
+              if (r.id === item.id) {
+                total += +r.value;
+              }
+              return total;
+            }, 0);
+          }),
+          backgroundColor: [
+            "rgba(255, 99, 132, 0.2)",
+            "rgba(54, 162, 235, 0.2)",
+            "rgba(255, 206, 86, 0.2)",
+            "rgba(75, 192, 192, 0.2)",
+            "rgba(153, 102, 255, 0.2)",
+            "rgba(255, 159, 64, 0.2)",
+          ],
+          borderColor: [
+            "rgba(255, 99, 132, 1)",
+            "rgba(54, 162, 235, 1)",
+            "rgba(255, 206, 86, 1)",
+            "rgba(75, 192, 192, 1)",
+            "rgba(153, 102, 255, 1)",
+            "rgba(255, 159, 64, 1)",
+          ],
+          borderWidth: 1,
+        },
+      ],
+    });
+  },
 };
 </script>
 
 <style lang="scss" scoped>
-.payments-list {
-  width: 45%;
-  position: relative;
-  &-header {
-    width: 100%;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    border-top: 1px solid #ccc;
-    border-left: 1px solid #ccc;
-    border-right: 1px solid #ccc;
-
-    &-count {
-      width: 15%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-right: 1px solid #ccc;
-    }
-
-    &-date {
-      width: 30%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-right: 1px solid #ccc;
-    }
-
-    &-category {
-      width: 30%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-right: 1px solid #ccc;
-    }
-
-    &-value {
-      width: 25%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-  }
-
-  &-wrapper {
-    width: 100%;
-    height: 440px;
-    overflow-y: overlay;
-    border: 1px solid #ccc;
-
-    &-table {
-      width: 100%;
-      height: 50px;
-      display: flex;
-      align-items: center;
-      border-bottom: 1px solid #ccc;
-
-      &-count {
-        width: 15%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-right: 1px solid #ccc;
-      }
-
-      &-date {
-        width: 30%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-right: 1px solid #ccc;
-      }
-
-      &-category {
-        width: 30%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-right: 1px solid #ccc;
-      }
-
-      &-value {
-        position: relative;
-        width: 25%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        &-menu {
-          position: absolute;
-          width: 20px;
-          height: 20px;
-          right: 5%;
-          background: transparent url("../assets/dots_icon.svg") no-repeat
-            center;
-          transition: all 0.1s ease-in-out;
-
-          &:hover {
-            background: #ccc url("../assets/dots_icon.svg") no-repeat center;
-            border-radius: 50%;
-            cursor: pointer;
-          }
-        }
-      }
-    }
-  }
+.payments-chart {
+  margin: auto;
 }
 </style>

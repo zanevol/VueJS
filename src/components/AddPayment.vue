@@ -1,25 +1,32 @@
 <template>
-  <div class="payment-modal">
-    <span @click.stop="$emit('closeModal')">&#10006;</span>
-
-    <form
-      ref="form"
-      @submit.prevent="savePayment"
-      v-if="editItem && Object.keys(editItem).length"
+  <v-card
+    class="pa-4 pt-0 text-right"
+    v-if="editItem && Object.keys(editItem).length"
+  >
+    <v-btn fab small plain class="mb-0 mt-2" @click.stop="$emit('closeDialog')"
+      ><v-icon>mdi-close</v-icon></v-btn
     >
-      <input type="text" v-model="editItem.date" placeholder="date" />
-      <input type="text" v-model="editItem.category" placeholder="category" />
-      <input type="text" v-model.number="editItem.value" placeholder="value" />
-      <button type="submit">Save</button>
-    </form>
+    <v-text-field
+      label="Date"
+      v-model="editItem.date"
+      class="mt-0 pt-0"
+    ></v-text-field>
+    <v-text-field label="Category" v-model="editItem.category"></v-text-field>
+    <v-text-field label="Value" v-model.number="editItem.value"></v-text-field>
+    <v-btn :ripple="false" color="teal" dark @click.stop="savePayment"
+      >Save</v-btn
+    >
+  </v-card>
 
-    <form ref="form" @submit.prevent="onClick" v-else>
-      <input type="text" v-model="date" placeholder="date" />
-      <input type="text" v-model="category" placeholder="category" />
-      <input type="text" v-model.number="value" placeholder="value" />
-      <button type="submit">Add Data</button>
-    </form>
-  </div>
+  <v-card class="pa-4 pt-0 text-right" v-else>
+    <v-btn fab small plain class="mb-0 mt-2" @click.stop="$emit('closeDialog')"
+      ><v-icon>mdi-close</v-icon></v-btn
+    >
+    <v-text-field label="Date" v-model="date" class="mt-0 pt-0"></v-text-field>
+    <v-text-field label="Category" v-model="category"></v-text-field>
+    <v-text-field label="Value" v-model.number="value"></v-text-field>
+    <v-btn :ripple="false" color="teal" dark @click.stop="onClick">Add</v-btn>
+  </v-card>
 </template>
 
 <script>
@@ -55,11 +62,10 @@ export default {
         value,
         id: Date.now(),
       });
-      this.$refs["form"].reset();
       this.date = "";
       this.category = "";
       this.value = "";
-      this.activeModal2 = "";
+      this.$emit("closeDialog");
     },
     savePayment() {
       this.editEl({
@@ -68,7 +74,10 @@ export default {
         value: this.editItem.value,
         id: this.editItem.id,
       });
-      this.activeModal = "";
+      this.editItem.date = "";
+      this.editItem.category = "";
+      this.editItem.value = "";
+      this.$emit("closeDialog");
     },
   },
   computed: {
@@ -103,64 +112,6 @@ export default {
       },
     },
   },
-  created() {
-    if (this.getQueryFromRoute || this.getCategoryParamsFromRoute) {
-      this.category = this.getCategoryParamsFromRoute;
-      this.value = this.getQueryFromRoute;
-    }
-  },
+  created() {},
 };
 </script> 
-
-<style lang="scss" scoped>
-.payment-modal {
-  position: absolute;
-  width: 350px;
-  height: 250px;
-  top: 21%;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  justify-content: space-evenly;
-  background: #fff;
-  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
-  border-radius: 5px;
-
-  span {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 25px;
-    height: 25px;
-    top: 5px;
-    right: 10px;
-    cursor: pointer;
-  }
-
-  form {
-    height: 250px;
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    justify-content: space-evenly;
-
-    input {
-      padding: 5px 0 5px 5px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      outline: none;
-    }
-  }
-
-  button {
-    border: none;
-    background: #25a79b;
-    padding: 5px 15px;
-    border-radius: 5px;
-    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
-    color: #fff;
-    cursor: pointer;
-  }
-}
-</style>

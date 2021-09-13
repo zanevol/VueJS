@@ -169,7 +169,7 @@ export default {
 .body {
   &-footer {
     &-pagination {
-      width: 45%;
+      width: 100%;
       height: 40px;
       display: flex;
       align-items: center;
@@ -217,7 +217,7 @@ export default {
         display: flex;
         align-items: center;
         font-size: 14px;
-				margin-right: 5px;
+        margin-right: 5px;
 
         .pages__count {
           margin-left: 10px;
@@ -227,9 +227,9 @@ export default {
         }
       }
 
-			&-count {
-				margin-left: 5px;
-			}
+      &-count {
+        margin-left: 5px;
+      }
 
       .activePagesAmount {
         color: #ccc !important;

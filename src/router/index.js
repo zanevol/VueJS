@@ -7,9 +7,9 @@ export default new VueRouter({
 	mode: 'history',
 	routes: [
 		{
-			path: '/add/:category/',
-			component: () => import('../components/Add.vue'),
-			name: 'Add'
+			path: '/dashboard',
+			component: () => import('../components/PaymentsDisplay.vue'),
+			name: 'PaymentsDisplay'
 		}
 	]
 })
