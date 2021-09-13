@@ -1,33 +1,31 @@
 <template>
-  <div id="app">
-    <Calc />
-    <router-view />
-  </div>
+  <v-app>
+    <v-app-bar app>
+      <v-btn
+        to="/dashboard"
+        color="blue-grey lighten-4"
+        :ripple="false"
+        class="mr-4"
+        >Dashboard</v-btn
+      >
+      <v-btn to="/about" color="blue-grey lighten-4" :ripple="false"
+        >About</v-btn
+      >
+    </v-app-bar>
+    <v-main>
+      <v-container>
+        <router-view />
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 
 <script>
-import Calc from "./components/Calc.vue";
-
 export default {
-  components: { Calc },
+  name: "App",
+
+  data: () => ({
+    //
+  }),
 };
 </script>
-
-<style lang="scss" scoped>
-#app {
-	width: 100%;
-	height: 100%;
-	display: flex;
-	text-align: center;
-	justify-content: center;
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-	box-sizing: border-box;
-	margin: 0;
-	padding: 0;
-}
-
-</style>
